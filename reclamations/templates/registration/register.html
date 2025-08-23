@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Inscription - AGILIS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .registration-card {
+        border: none;
+        background-color: rgba(56, 56, 56, 0.95);
+        backdrop-filter: blur(5px);
+        transition: transform 0.3s ease;
+    }
+    
+    .registration-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, var(--agilis-dark-gray), var(--agilis-medium-gray));
+        border-bottom: 3px solid var(--agilis-vivid-yellow);
+        letter-spacing: 0.5px;
+    }
+    
+    .form-label {
+        color: var(--agilis-vivid-yellow);
+        font-weight: 500;
+    }
+    
+    .form-control, .form-select {
+        background-color: rgba(255, 255, 255, 0.95);
+        border: 1px solid var(--agilis-dark-gray);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--agilis-vivid-yellow);
+        box-shadow: 0 0 0 0.25rem rgba(255, 200, 18, 0.25);
+    }
+    
+    .btn-register {
+        background: linear-gradient(to right, var(--agilis-vivid-yellow), var(--agilis-golden-yellow));
+        border: none;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        padding: 10px;
+    }
+    
+    .btn-register:hover {
+        background: linear-gradient(to right, var(--agilis-golden-yellow), var(--agilis-vivid-yellow));
+    }
+    
+    .account-type-icon {
+        font-size: 1.2rem;
+        margin-right: 8px;
+        color: var(--agilis-vivid-yellow);
+    }
+    
+    .optgroup-label {
+        color: var(--agilis-vivid-yellow);
+        font-weight: 600;
+    }
+    
+    .terms-check {
+        color: #ddd;
+    }
+    
+    .terms-check input {
+        margin-right: 8px;
+    }
+    
+    .login-link {
+        color: var(--agilis-vivid-yellow);
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+    
+    .login-link:hover {
+        color: white;
+        text-decoration: underline;
+    }
+    
+    .password-hint {
+        font-size: 0.8rem;
+        color: #bbb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card registration-card shadow-lg">
+                <div class="card-header text-center py-3">
+                    <h3 class="mb-0"><i class="bi bi-person-plus-fill me-2"></i>Création de compte</h3>
+                </div>
+                <div class="card-body px-4 py-4">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Erreur(s) dans le formulaire :</strong>
+                            <ul class="mb-0 mt-2">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <label for="id_username" class="form-label">
+                                <i class="bi bi-person-fill account-type-icon"></i>Nom d'utilisateur
+                            </label>
+                            <input type="text" name="username" class="form-control form-control-lg" id="id_username" required>
+                            <div class="password-hint">150 caractères max. Caractères alphanumériques uniquement.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_email" class="form-label">
+                                <i class="bi bi-envelope-fill account-type-icon"></i>Email
+                            </label>
+                            <input type="email" name="email" class="form-control form-control-lg" id="id_email" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_role" class="form-label">
+                                <i class="bi bi-person-badge-fill account-type-icon"></i>Type de compte
+                            </label>
+                            <select name="role" class="form-select form-select-lg" id="id_role" required>
+                                <option value="" disabled selected>--- Sélectionnez votre profil ---</option>
+                                <optgroup label="🛒 Comptes clients" class="optgroup-label">
+                                    <option value="CLIENT">Client particulier</option>
+                                    <option value="AGENT">Agent de station</option>
+                                </optgroup>
+                                <optgroup label="🛠️ Comptes spécialistes" class="optgroup-label">
+                                    <option value="TECH">Technicien</option>
+                                    <option value="FINANCE">Agent financier</option>
+                                    <option value="SUPPORT">Support client</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_phone" class="form-label">
+                                <i class="bi bi-telephone-fill account-type-icon"></i>Téléphone
+                            </label>
+                            <input type="tel" name="phone" class="form-control form-control-lg" id="id_phone" placeholder="Optionnel">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_password1" class="form-label">
+                                <i class="bi bi-lock-fill account-type-icon"></i>Mot de passe
+                            </label>
+                            <input type="password" name="password1" class="form-control form-control-lg" id="id_password1" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_password2" class="form-label">
+                                <i class="bi bi-shield-lock-fill account-type-icon"></i>Confirmation
+                            </label>
+                            <input type="password" name="password2" class="form-control form-control-lg" id="id_password2" required>
+                        </div>
+
+                        <div class="terms-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="id_terms" required>
+                            <label class="form-check-label" for="id_terms">
+                                J'accepte les <a href="#" class="text-decoration-none" style="color: var(--agilis-vivid-yellow);">conditions d'utilisation</a>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-register btn-lg w-100 mb-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>S'inscrire
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <p class="mb-0">Déjà un compte ? <a href="{% url 'login' %}" class="login-link">Connectez-vous ici</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    //gestion automatique des équipes selon le rôle
+    const roleSelect = document.getElementById('id_role');
+    const teamsInput = document.createElement('input');
+    teamsInput.type = 'hidden';
+    teamsInput.name = 'teams';
+    teamsInput.value = '[]';
+    document.querySelector('form').appendChild(teamsInput);
+
+    roleSelect.addEventListener('change', function() {
+        const role = this.value;
+        let teams = [];
+        
+        if (role === 'TECH') teams = ['TECH'];
+        else if (role === 'FINANCE') teams = ['FINANCE'];
+        else if (role === 'SUPPORT') teams = ['SUPPORT'];
+        else if (role === 'AGENT') teams = ['STATION'];
+        
+        teamsInput.value = JSON.stringify(teams);
+        
+        // Animation de feedback
+        if (role) {
+            this.style.borderColor = 'var(--agilis-vivid-yellow)';
+            setTimeout(() => {
+                this.style.borderColor = '';
+            }, 1000);
+        }
+    });
+
+    // Validation en temps réel
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.prototype.slice.call(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+});
+</script>
+{% endblock %}

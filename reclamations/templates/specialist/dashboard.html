@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+{% load user_tags %}
+
+{% block title %}Tableau de Bord Spécialiste{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        border: none;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        height: 100%;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-card.available {
+        background: linear-gradient(135deg, var(--agilis-dark-gray), #0062cc);
+        border-left: 5px solid var(--agilis-vivid-yellow);
+    }
+    
+    .stat-card.pending {
+        background: linear-gradient(135deg, var(--agilis-dark-gray), #17a2b8);
+        border-left: 5px solid var(--agilis-vivid-yellow);
+    }
+    
+    .stat-card.in-progress {
+        background: linear-gradient(135deg, var(--agilis-dark-gray), #ffc107);
+        border-left: 5px solid var(--agilis-vivid-yellow);
+        color: var(--agilis-black);
+    }
+    
+    .stat-card .card-title {
+        font-size: 1.1rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-card .display-4 {
+        font-weight: 700;
+        margin-top: 10px;
+    }
+    
+    .dashboard-card {
+        border: none;
+        background-color: rgba(56, 56, 56, 0.95);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .dashboard-card .card-header {
+        background: linear-gradient(135deg, var(--agilis-dark-gray), var(--agilis-medium-gray));
+        border-bottom: 3px solid var(--agilis-vivid-yellow);
+        letter-spacing: 0.5px;
+    }
+    
+    .table-responsive {
+        border-radius: 8px;
+        overflow: auto;
+    }
+    
+    .table {
+        margin-bottom: 0;
+        color: white;
+        min-width: 1000px; /* Largeur minimale pour garantir l'affichage complet */
+    }
+    
+    .table thead th {
+        background-color: var(--agilis-dark-gray);
+        border-bottom: 2px solid var(--agilis-vivid-yellow);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .table tbody tr {
+        background-color: rgba(56, 56, 56, 0.8);
+        transition: all 0.2s ease;
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(70, 70, 70, 0.9);
+    }
+    
+    .badge-priority-high {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .badge-priority-medium {
+        background-color: #fd7e14;
+        color: white;
+    }
+    
+    .badge-priority-low {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .badge-status-open {
+        background-color: #17a2b8;
+        color: white;
+    }
+    
+    .badge-status-progress {
+        background-color: #ffc107;
+        color: var(--agilis-black);
+    }
+    
+    .badge-status-closed {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .action-btn {
+        min-width: 110px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+    
+    .time-estimate {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    
+    .alert-access {
+        border-left: 5px solid #dc3545;
+    }
+    
+    .text-truncate {
+        max-width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+    }
+    
+    @media (max-width: 992px) {
+        .table-responsive {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .action-btn {
+            min-width: auto;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% if user|is_specialist %}
+    <div class="row mb-4 g-4">
+        <div class="col-md-4">
+            <div class="stat-card available card text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">
+                        <i class="bi bi-folder2-open me-2"></i>Réclamations disponibles
+                    </h5>
+                    <p class="display-4">{{ stats.total }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card pending card text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">
+                        <i class="bi bi-hourglass-split me-2"></i>En attente
+                    </h5>
+                    <p class="display-4">{{ stats.open }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card in-progress card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">
+                        <i class="bi bi-gear-wide-connected me-2"></i>En traitement
+                    </h5>
+                    <p class="display-4">{{ stats.in_progress }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-card card mb-5">
+        <div class="card-header text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-list-task me-2"></i>
+                Réclamations de l'équipe disponibles
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if team_reclamations %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">ID</th>
+                                <th style="width: 120px;">Créée le</th>
+                                <th style="width: 150px;">Client</th>
+                                <th style="width: 150px;">Type</th>
+                                <th style="width: 120px;">Priorité</th>
+                                <th style="width: 120px;">Statut</th>
+                                <th style="width: 150px;">Temps estimé</th>
+                                <th style="width: 200px;" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rec in team_reclamations %}
+                            <tr>
+                                <td class="fw-bold">#{{ rec.id }}</td>
+                                <td>
+                                    <span class="d-block">{{ rec.created_at|date:"d/m/Y" }}</span>
+                                    <small class="text-muted">{{ rec.created_at|date:"H:i" }}</small>
+                                </td>
+                                <td>
+                                    <span class="text-truncate" title="{{ rec.user.get_full_name|default:rec.user.username }}">
+                                        {{ rec.user.get_full_name|default:rec.user.username }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-truncate" title="{{ rec.get_problem_type_display }}">
+                                        {{ rec.get_problem_type_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge 
+                                        {% if rec.priority == 'HIGH' %}badge-priority-high
+                                        {% elif rec.priority == 'MEDIUM' %}badge-priority-medium
+                                        {% else %}badge-priority-low{% endif %}">
+                                        <i class="bi 
+                                            {% if rec.priority == 'HIGH' %}bi-exclamation-triangle-fill
+                                            {% elif rec.priority == 'MEDIUM' %}bi-exclamation-circle-fill
+                                            {% else %}bi-info-circle-fill{% endif %} me-1">
+                                        </i>
+                                        {{ rec.get_priority_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge 
+                                        {% if rec.status == 'OPEN' %}badge-status-open
+                                        {% elif rec.status == 'IN_PROGRESS' %}badge-status-progress
+                                        {% else %}badge-status-closed{% endif %}">
+                                        <i class="bi 
+                                            {% if rec.status == 'OPEN' %}bi-hourglass-split
+                                            {% elif rec.status == 'IN_PROGRESS' %}bi-arrow-repeat
+                                            {% else %}bi-check-circle{% endif %} me-1">
+                                        </i>
+                                        {{ rec.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if rec.estimated_resolution %}
+                                        <span class="time-estimate">{{ rec.estimated_resolution|date:"d/m/Y" }}</span>
+                                        <br>
+                                        <small class="text-muted">
+                                            ({{ rec.estimated_resolution|timeuntil }})
+                                        </small>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a href="{% url 'reclamations:detail' rec.id %}" 
+                                           class="btn btn-sm btn-primary action-btn">
+                                            <i class="bi bi-eye-fill me-1"></i> Consulter
+                                        </a>
+                                        {% if rec.status == 'OPEN' %}
+                                        <form method="post" action="{% url 'reclamations:take_charge' rec.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-success action-btn">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Prendre
+                                            </button>
+                                        </form>
+                                        {% elif rec.status == 'IN_PROGRESS' %}
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Assignée
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-success d-flex align-items-center m-4">
+                    <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+                    <div>
+                        <h5 class="alert-heading mb-1">Tout est sous contrôle !</h5>
+                        <p class="mb-0">Toutes les réclamations sont actuellement assignées.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-danger alert-access d-flex align-items-center">
+        <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+        <div>
+            <h5 class="alert-heading mb-1">Accès restreint</h5>
+            <p class="mb-0">Cette section est réservée aux spécialistes AGILIS.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    //anim cartes
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 150);
+    });
+    
+    //init
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Supprimer Réclamation #{{ object.id }}{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'reclamations:list' %}">Mes Réclamations</a></li>
+<li class="breadcrumb-item"><a href="{% url 'reclamations:detail' object.id %}">Réclamation #{{ object.id }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Suppression</li>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card shadow-lg border-yellow">
+    <div class="card-header bg-dark-gray text-white">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-exclamation-triangle-fill fs-3 me-3 text-yellow"></i>
+        <h4 class="mb-0">Confirmation de suppression</h4>
+      </div>
+    </div>
+    <div class="card-body bg-medium-gray">
+      <div class="alert alert-warning bg-dark-gray border-yellow text-white mb-4">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-trash3-fill fs-4 me-3 text-yellow"></i>
+          <div>
+            <h5 class="alert-heading">Attention ! Action irréversible</h5>
+            <p class="mb-0">
+              Vous êtes sur le point de supprimer définitivement la réclamation <strong>#{{ object.id }}</strong>.
+              Cette action ne peut pas être annulée.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <h5 class="text-yellow mb-3"><i class="bi bi-card-heading me-2"></i>Détails de la réclamation</h5>
+        <div class="list-group">
+          <div class="list-group-item bg-dark-gray text-white border-yellow">
+            <div class="d-flex justify-content-between">
+              <span><i class="bi bi-tag me-2 text-yellow"></i><strong>Type :</strong></span>
+              <span>{{ object.get_problem_type_display }}</span>
+            </div>
+          </div>
+          <div class="list-group-item bg-dark-gray text-white border-yellow">
+            <div class="d-flex justify-content-between">
+              <span><i class="bi bi-credit-card me-2 text-yellow"></i><strong>Type de carte :</strong></span>
+              <span>{{ object.get_card_type_display }}</span>
+            </div>
+          </div>
+          <div class="list-group-item bg-dark-gray text-white border-yellow">
+            <div class="d-flex justify-content-between">
+              <span><i class="bi bi-calendar-event me-2 text-yellow"></i><strong>Créée le :</strong></span>
+              <span>{{ object.created_at|date:"d/m/Y H:i" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'reclamations:detail' object.id %}" class="btn btn-outline-yellow">
+            <i class="bi bi-arrow-left me-1"></i> Annuler
+          </a>
+          <button type="submit" class="btn btn-yellow">
+            <i class="bi bi-trash3-fill me-1"></i> Confirmer la suppression
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  .border-yellow {
+    border-color: var(--agilis-vivid-yellow) !important;
+  }
+  
+  .text-yellow {
+    color: var(--agilis-vivid-yellow);
+  }
+  
+  .bg-dark-gray {
+    background-color: var(--agilis-dark-gray);
+  }
+  
+  .bg-medium-gray {
+    background-color: var(--agilis-medium-gray);
+  }
+  
+  .btn-yellow {
+    background-color: var(--agilis-vivid-yellow);
+    border-color: var(--agilis-vivid-yellow);
+    color: var(--agilis-black);
+    font-weight: 600;
+  }
+  
+  .btn-yellow:hover {
+    background-color: var(--agilis-golden-yellow);
+    border-color: var(--agilis-golden-yellow);
+    color: var(--agilis-black);
+  }
+  
+  .btn-outline-yellow {
+    border-color: var(--agilis-vivid-yellow);
+    color: var(--agilis-vivid-yellow);
+  }
+  
+  .btn-outline-yellow:hover {
+    background-color: var(--agilis-vivid-yellow);
+    color: var(--agilis-black);
+  }
+  
+  .alert-warning {
+    background-color: rgba(255, 200, 18, 0.15);
+    border-left: 4px solid var(--agilis-vivid-yellow);
+  }
+  
+  .list-group-item {
+    border-width: 1px;
+    border-style: solid;
+    margin-bottom: 0.5rem;
+    border-radius: 0.375rem !important;
+  }
+</style>
+{% endblock %}

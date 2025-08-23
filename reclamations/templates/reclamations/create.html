@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Nouvelle Réclamation{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'reclamations:list' %}">Mes Réclamations</a></li>
+<li class="breadcrumb-item active" aria-current="page">Nouvelle</li>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="card shadow-lg border-0">
+    <div class="card-header bg-dark-gray text-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-0 text-yellow"><i class="bi bi-megaphone me-2"></i>Nouvelle Réclamation</h2>
+        <a href="{% url 'reclamations:list' %}" class="btn btn-outline-yellow btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Retour
+        </a>
+      </div>
+    </div>
+    <div class="card-body bg-medium-gray">
+      <form method="post" enctype="multipart/form-data" novalidate class="needs-validation">
+        {% csrf_token %}
+
+        {# Display non-field errors #}
+        {% if form.non_field_errors %}
+          <div class="alert alert-warning bg-dark-gray border-yellow text-white">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        {# Hidden field for station_coords #}
+        {{ form.station_coords }}
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <!-- Carte concernée -->
+            <div class="mb-3">
+              <label for="{{ form.card_type.id_for_label }}" class="form-label fw-bold text-white">
+                <i class="bi bi-credit-card me-1 text-yellow"></i>Type de carte
+              </label>
+              <select name="card_type" class="form-select bg-light border-dark" id="id_card_type">
+                {% for value, label in form.card_type.field.choices %}
+                  <option value="{{ value }}" {% if form.card_type.value == value %}selected{% endif %}>
+                    {{ label }}
+                  </option>
+                {% endfor %}
+              </select>
+              {% if form.card_type.errors %}
+                <div class="invalid-feedback d-block text-yellow">{{ form.card_type.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Priorité -->
+            <div class="mb-3">
+              <label for="{{ form.priority.id_for_label }}" class="form-label fw-bold text-white">
+                <i class="bi bi-exclamation-triangle-fill me-1 text-yellow"></i>Priorité
+              </label>
+              {{ form.priority }}
+              {% if form.priority.errors %}
+                <div class="invalid-feedback d-block text-yellow">{{ form.priority.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Numéro de carte manuel -->
+            <div class="mb-3">
+              <label for="{{ form.card_number_manual.id_for_label }}" class="form-label fw-bold text-white">
+                <i class="bi bi-pencil-square me-1 text-yellow"></i>Numéro de carte (saisie manuelle)
+              </label>
+              {{ form.card_number_manual }}
+              <small class="text-light">
+                Si vous ne trouvez pas votre carte dans la liste ci-dessus, entrez-la ici.
+              </small>
+              {% if form.card_number_manual.errors %}
+                <div class="invalid-feedback d-block text-yellow">{{ form.card_number_manual.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Station-service select -->
+            <div class="mb-3">
+              <label for="{{ form.station.id_for_label }}" class="form-label fw-bold text-white">
+                <i class="bi bi-geo-alt me-1 text-yellow"></i>Station-service
+              </label>
+              {{ form.station }}
+              <small class="text-light">Facultatif si non applicable</small>
+              {% if form.station.errors %}
+                <div class="invalid-feedback d-block text-yellow">{{ form.station.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Leaflet Map for station selection -->
+            <div class="mb-3">
+              <label class="form-label fw-bold text-white">
+                <i class="bi bi-map me-1 text-yellow"></i>Choix de la station sur carte
+              </label>
+              {{ form.station_coords }}
+              <div id="map" class="border border-yellow rounded"></div>
+              <small class="text-light">Cliquez sur un marqueur pour remplir la liste "Station-service".</small>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <!-- Date et heure de l'incident -->
+            <div class="mb-3">
+              <label class="form-label fw-bold text-white">
+                <i class="bi bi-calendar-event me-1 text-yellow"></i>Date et heure de l'incident
+              </label>
+              <div class="row g-2">
+                <div class="col-6">
+                  {{ form.incident_date }}
+                  {% if form.incident_date.errors %}
+                    <div class="invalid-feedback d-block text-yellow">{{ form.incident_date.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-6">
+                  {{ form.incident_time }}
+                  {% if form.incident_time.errors %}
+                    <div class="invalid-feedback d-block text-yellow">{{ form.incident_time.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Type de problème -->
+            <div class="mb-3">
+              <label for="{{ form.problem_type.id_for_label }}" class="form-label fw-bold text-white">
+                <i class="bi bi-exclamation-triangle me-1 text-yellow"></i>Type de problème
+              </label>
+              {{ form.problem_type }}
+              {% if form.problem_type.errors %}
+                <div class="invalid-feedback d-block text-yellow">{{ form.problem_type.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Contact Method -->
+            <div class="mb-3">
+              <label for="{{ form.contact_method.id_for_label }}" class="form-label fw-bold text-white">
+                <i class="bi bi-telephone me-1 text-yellow"></i>Méthode de contact
+              </label>
+              {{ form.contact_method }}
+              {% if form.contact_method.errors %}
+                <div class="invalid-feedback d-block text-yellow">{{ form.contact_method.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Callback Request -->
+            <div class="mb-3 form-check form-switch ps-0">
+              <div class="form-check form-switch">
+                {{ form.requires_callback }}
+                <label for="{{ form.requires_callback.id_for_label }}" class="form-check-label text-white">
+                  <i class="bi bi-telephone-outbound me-1 text-yellow"></i>Demander un rappel
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description détaillée -->
+        <div class="mb-4">
+          <label for="{{ form.description.id_for_label }}" class="form-label fw-bold text-white">
+            <i class="bi bi-text-paragraph me-1 text-yellow"></i>Description détaillée
+          </label>
+          {{ form.description }}
+          <div class="form-text text-light">Décrivez précisément le problème (minimum 30 caractères).</div>
+          {% if form.description.errors %}
+            <div class="invalid-feedback d-block text-yellow">{{ form.description.errors }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Pièces jointes -->
+        <div class="mb-4">
+          <label class="form-label fw-bold text-white">
+            <i class="bi bi-paperclip me-1 text-yellow"></i>Pièces jointes (optionnel)
+          </label>
+          <div class="file-upload-wrapper">
+            {{ form.attachments }}
+            <small class="text-light">
+              Formats acceptés : JPG, PNG, PDF, DOC, DOCX (max 5 MB par fichier)
+            </small>
+            {% if form.attachments.errors %}
+              <div class="invalid-feedback d-block text-yellow">{{ form.attachments.errors }}</div>
+            {% endif %}
+          </div>
+          <div id="filePreview" class="mt-2"></div>
+        </div>
+
+        <!-- Boutons -->
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+          <button type="reset" class="btn btn-outline-yellow me-md-2">
+            <i class="bi bi-eraser me-1"></i> Effacer
+          </button>
+          <button type="submit" class="btn btn-yellow">
+            <i class="bi bi-send-check me-1"></i> Soumettre la réclamation
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<!-- Leaflet CSS -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+  integrity="sha256-sA+4D6nvRkA4qY5RqYH2+w0Lz0pO4iyhzwv+Q4rP5ss="
+  crossorigin=""/>
+
+<style>
+  /* Styles de base */
+  #map {
+    height: 300px;
+    width: 100%;
+    border: 2px solid var(--agilis-vivid-yellow);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    background-color: var(--agilis-dark-gray);
+  }
+  
+  .file-preview-item {
+    width: 100px;
+    border: 1px solid var(--agilis-vivid-yellow);
+    border-radius: 5px;
+    padding: 5px;
+    text-align: center;
+    display: inline-block;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    background-color: var(--agilis-dark-gray);
+  }
+  
+  .file-preview-item img {
+    max-width: 100%;
+    height: 60px;
+    object-fit: contain;
+  }
+  
+  .file-preview-item .file-name {
+    font-size: 0.7rem;
+    word-break: break-word;
+    color: white;
+  }
+  
+  /* Styles spécifiques AGILIS améliorés */
+  .card {
+    background-color: var(--agilis-medium-gray);
+    color: white;
+  }
+  
+  .card-header {
+    background-color: var(--agilis-dark-gray);
+    border-bottom: 3px solid var(--agilis-vivid-yellow);
+  }
+  
+  .text-yellow {
+    color: var(--agilis-vivid-yellow);
+  }
+  
+  .bg-dark-gray {
+    background-color: var(--agilis-dark-gray);
+  }
+  
+  .bg-medium-gray {
+    background-color: var(--agilis-medium-gray);
+  }
+  
+  .btn-yellow {
+    background-color: var(--agilis-vivid-yellow);
+    border-color: var(--agilis-vivid-yellow);
+    color: var(--agilis-black);
+    font-weight: 600;
+  }
+  
+  .btn-yellow:hover {
+    background-color: var(--agilis-golden-yellow);
+    border-color: var(--agilis-golden-yellow);
+    color: var(--agilis-black);
+  }
+  
+  .btn-outline-yellow {
+    border-color: var(--agilis-vivid-yellow);
+    color: var(--agilis-vivid-yellow);
+  }
+  
+  .btn-outline-yellow:hover {
+    background-color: var(--agilis-vivid-yellow);
+    color: var(--agilis-black);
+  }
+  
+  .form-control, .form-select {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--agilis-dark-gray);
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: var(--agilis-vivid-yellow);
+    box-shadow: 0 0 0 0.25rem rgba(255, 200, 18, 0.25);
+  }
+  
+  .text-light {
+    color: #e0e0e0 !important;
+  }
+  
+  /* Style pour les erreurs */
+  .is-invalid {
+    border-color: #dc3545 !important;
+  }
+  
+  .invalid-feedback {
+    color: var(--agilis-vivid-yellow) !important;
+  }
+  
+  /* Style pour le switch */
+  .form-switch .form-check-input:checked {
+    background-color: var(--agilis-vivid-yellow);
+    border-color: var(--agilis-vivid-yellow);
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet JS -->
+<script
+  src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+  integrity="sha256-DvK1Nw+2pFjg1HwCIO5RqdpTXYZM4KSh3A0yt5p37Dk="
+  crossorigin="">
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  //max day lyoum
+  const today = new Date().toISOString().split('T')[0];
+  const dateField = document.getElementById('id_incident_date');
+  if (dateField) dateField.setAttribute('max', today);
+
+  //dans description min 30
+  const descField = document.getElementById('id_description');
+  if (descField) {
+    descField.addEventListener('input', function() {
+      this.classList.toggle('is-invalid', this.value.length < 30);
+    });
+  }
+
+  //fichier
+  const fileInput = document.getElementById('id_attachments');
+  const filePreview = document.getElementById('filePreview');
+  if (fileInput && filePreview) {
+    fileInput.addEventListener('change', function() {
+      filePreview.innerHTML = '';
+      if (this.files.length) {
+        const count = document.createElement('div');
+        count.className = 'w-100 mb-2 small text-light';
+        count.textContent = `${this.files.length} fichier(s) sélectionné(s)`;
+        filePreview.appendChild(count);
+      }
+      Array.from(this.files).forEach(file => {
+        const item = document.createElement('div');
+        item.className = 'file-preview-item';
+        if (file.type.startsWith('image/')) {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          item.appendChild(img);
+        } else {
+          const icon = document.createElement('i');
+          icon.className = 'bi bi-file-earmark-text fs-3 text-yellow';
+          item.appendChild(icon);
+        }
+        const name = document.createElement('div');
+        name.className = 'file-name mt-1';
+        name.textContent = file.name.length > 15
+          ? file.name.substring(0, 10) + '...' + file.name.split('.').pop()
+          : file.name;
+        item.appendChild(name);
+        filePreview.appendChild(item);
+      });
+    });
+  }
+
+  // init de map
+  const center = [33.9196, 8.1335];
+  const map = L.map('map').setView(center, 10);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+  }).addTo(map);
+
+  let userMarker;
+  const stations = {{ stations_json|safe }};
+  
+
+  const stationIcon = L.icon({
+    iconUrl: '{% static "images/marker-icon.png" %}',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34]
+  });
+  
+  stations.forEach(s => {
+    const marker = L.marker([s.lat, s.lng], {icon: stationIcon}).addTo(map);
+    marker.bindPopup(`<strong class="text-dark">${s.name}</strong>`);
+    marker.on('click', () => {
+      document.getElementById('station_coords').value = `${s.lat},${s.lng}`;
+      document.getElementById('id_station').value = s.id;
+      if (userMarker) map.removeLayer(userMarker);
+      userMarker = L.marker([s.lat, s.lng], { 
+        riseOnHover: true,
+        icon: L.icon({
+          iconUrl: '{% static "images/marker-icon-selected.png" %}',
+          iconSize: [35, 51],
+          iconAnchor: [17, 51]
+        })
+      }).addTo(map);
+    });
+  });
+});
+</script>
+{% endblock %}

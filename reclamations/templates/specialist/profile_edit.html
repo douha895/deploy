@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier mon profil - AGILIS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-card {
+        border: none;
+        background-color: rgba(56, 56, 56, 0.95);
+        backdrop-filter: blur(5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .profile-card-header {
+        background: linear-gradient(135deg, var(--agilis-dark-gray), var(--agilis-medium-gray));
+        border-bottom: 3px solid var(--agilis-vivid-yellow);
+        padding: 1.5rem;
+    }
+    
+    .profile-card-title {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    .profile-form .form-label {
+        color: var(--agilis-vivid-yellow);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-form .form-control, 
+    .profile-form .form-select {
+        background-color: rgba(255, 255, 255, 0.95);
+        border: 1px solid var(--agilis-dark-gray);
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+    }
+    
+    .profile-form .form-control:focus, 
+    .profile-form .form-select:focus {
+        border-color: var(--agilis-vivid-yellow);
+        box-shadow: 0 0 0 0.25rem rgba(255, 200, 18, 0.25);
+    }
+    
+    .form-text {
+        color: #bbb !important;
+        font-size: 0.85rem;
+    }
+    
+    .btn-profile {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        transition: all 0.3s;
+    }
+    
+    .btn-profile-cancel {
+        background-color: var(--agilis-medium-gray);
+        color: white;
+        border: 1px solid #666;
+    }
+    
+    .btn-profile-cancel:hover {
+        background-color: #444;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .btn-profile-save {
+        background: linear-gradient(to right, var(--agilis-vivid-yellow), var(--agilis-golden-yellow));
+        color: var(--agilis-black);
+        border: none;
+        font-weight: 600;
+    }
+    
+    .btn-profile-save:hover {
+        background: linear-gradient(to right, var(--agilis-golden-yellow), var(--agilis-vivid-yellow));
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(255, 200, 18, 0.3);
+    }
+    
+    /* Style pour le champ teams (select multiple) */
+    select[multiple] {
+        min-height: 120px;
+    }
+    
+    select[multiple] option {
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    select[multiple] option:hover {
+        background-color: var(--agilis-vivid-yellow);
+        color: var(--agilis-black);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card profile-card">
+                <div class="card-header profile-card-header text-white">
+                    <h4 class="profile-card-title mb-0">
+                        <i class="bi bi-person-gear me-2"></i>Modifier mon profil
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" class="profile-form">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person-fill me-2"></i>Prénom
+                                </label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person-vcard-fill me-2"></i>Nom
+                                </label>
+                                {{ form.last_name }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                <i class="bi bi-envelope-fill me-2"></i>Email
+                            </label>
+                            {{ form.email }}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                <i class="bi bi-telephone-fill me-2"></i>Téléphone
+                            </label>
+                            {{ form.phone }}
+                            <div class="form-text mt-2">
+                                <i class="bi bi-info-circle me-1"></i>Format international recommandé (ex: +212612345678)
+                            </div>
+                        </div>
+                        
+                        {% if form.teams %}
+                        <div class="mb-4">
+                            <label for="{{ form.teams.id_for_label }}" class="form-label">
+                                <i class="bi bi-people-fill me-2"></i>Équipes
+                            </label>
+                            {{ form.teams }}
+                            <div class="form-text mt-2">
+                                <i class="bi bi-lightbulb me-1"></i>Maintenez Ctrl (Windows) ou Cmd (Mac) pour sélectionner plusieurs options
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                            <a href="{% url 'reclamations:specialist_profile' %}" class="btn btn-profile btn-profile-cancel me-3">
+                                <i class="bi bi-x-circle-fill me-1"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-profile btn-profile-save">
+                                <i class="bi bi-check-circle-fill me-1"></i> Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    const inputs = document.querySelectorAll('.profile-form input, .profile-form select');
+    inputs.forEach(input => {
+        
+        input.addEventListener('focus', function() {
+            this.parentNode.querySelector('.form-label').style.color = 'var(--agilis-golden-yellow)';
+        });
+        
+        
+        input.addEventListener('blur', function() {
+            this.parentNode.querySelector('.form-label').style.color = 'var(--agilis-vivid-yellow)';
+        });
+        
+        //validation en temps réel
+        input.addEventListener('input', function() {
+            if (this.checkValidity()) {
+                this.style.borderColor = 'var(--agilis-vivid-yellow)';
+            } else {
+                this.style.borderColor = '';
+            }
+        });
+    });
+    
+    //chargement
+    const card = document.querySelector('.profile-card');
+    setTimeout(() => {
+        card.style.transform = 'translateY(0)';
+        card.style.opacity = '1';
+    }, 100);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,17 @@
+Bonjour {{ specialist.first_name }},
+
+Une nouvelle réclamation vous a été assignée :
+
+Réclamation #{{ reclamation.id }}
+Type : {{ problem_type }}
+Priorité : {{ priority }}
+Date : {{ reclamation.created_at|date:"d/m/Y H:i" }}
+Client : {{ reclamation.user.get_full_name|default:reclamation.user.username }}
+
+Accéder à la réclamation : {{ BASE_URL }}{% url 'reclamations:detail' reclamation.id %}
+
+Description :
+{{ reclamation.description|truncatechars:100 }}
+
+Cordialement,
+L'équipe AGILIS

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="splash-container">
+    <div class="splash-content">
+        
+        <img src="{% static 'images/logo.png' %}" alt="AGILIS Logo" class="splash-logo">
+        <h1 class="splash-title">Bienvenue sur AGILIS</h1>
+        
+        
+        <div class="loading-indicator">
+            <div class="spinner"></div>
+            <p>Chargement de l'application...</p>
+        </div>
+        
+        
+        <div class="fallback-link mt-4">
+            <p>Si la redirection ne fonctionne pas, <a href="{% url 'login' %}" class="text-warning">cliquez ici</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    //redirection après 3 secondes
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            window.location.href = "{% url 'login' %}";
+        }, 3000);
+        
+        //animation de la bar
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        document.querySelector('.loading-indicator').appendChild(progressBar);
+        
+        let width = 0;
+        const interval = setInterval(function() {
+            width += 1;
+            progressBar.style.width = width + '%';
+            if (width >= 100) clearInterval(interval);
+        }, 30); 
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .splash-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(135deg, var(--agilis-dark-gray), var(--agilis-black));
+    }
+    
+    .splash-content {
+        text-align: center;
+        color: white;
+        max-width: 600px;
+        padding: 2rem;
+    }
+    
+    .splash-logo {
+        max-width: 200px;
+        margin-bottom: 1.5rem;
+        animation: fadeIn 1s ease-in-out;
+    }
+    
+    .splash-title {
+        color: var(--agilis-vivid-yellow);
+        margin-bottom: 2rem;
+        font-size: 2.5rem;
+        animation: slideUp 0.8s ease-out;
+    }
+    
+    .loading-indicator {
+        margin-top: 2rem;
+    }
+    
+    .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top: 4px solid var(--agilis-vivid-yellow);
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+    
+    .progress-bar {
+        height: 4px;
+        background-color: var(--agilis-vivid-yellow);
+        width: 0;
+        transition: width 0.3s ease;
+        margin-top: 1rem;
+    }
+    
+    .fallback-link {
+        opacity: 0.7;
+        font-size: 0.9rem;
+        animation: fadeIn 2s ease-in-out;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}

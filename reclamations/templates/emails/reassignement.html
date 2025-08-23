@@ -1,0 +1,32 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2 style="color: #0d6efd;">Réaffectation de réclamation</h2>
+
+<p>Bonjour {{ specialist.first_name }},</p>
+
+{% if action == 'assigned' %}
+<div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+    <p>La réclamation suivante vous a été réaffectée :</p>
+    <p><strong>Ancien responsable :</strong> {{ old_specialist.get_full_name }}</p>
+{% else %}
+<div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+    <p>La réclamation suivante a été transférée :</p>
+    <p><strong>Nouveau responsable :</strong> {{ new_specialist.get_full_name }}</p>
+{% endif %}
+
+    <p><strong>Réf. :</strong> #{{ reclamation.id }}</p>
+    <p><strong>Type :</strong> {{ reclamation.get_problem_type_display }}</p>
+    <p><strong>Priorité :</strong> <span style="color: {% if reclamation.priority == 'HIGH' %}red{% elif reclamation.priority == 'MEDIUM' %}orange{% else %}green{% endif %};">
+        {{ reclamation.get_priority_display }}
+    </span></p>
+</div>
+
+<a href="{{ BASE_URL }}{% url 'reclamations:detail' reclamation.id %}" 
+   style="background-color: #0d6efd; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">
+    Accéder à la réclamation
+</a>
+
+<p style="margin-top: 20px;">Cordialement,<br>
+<strong>L'équipe technique AGILIS</strong></p>
+{% endblock %}

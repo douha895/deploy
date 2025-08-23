@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Tableau de bord Administrateur{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-dashboard {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--agilis-dark-gray), var(--agilis-medium-gray));
+        color: white;
+        border-radius: 12px 12px 0 0;
+        padding: 2rem;
+        border-bottom: 3px solid var(--agilis-vivid-yellow);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .stat-card {
+        background: linear-gradient(145deg, #2a2a2a, #1f1f1f);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(255, 200, 18, 0.3);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--agilis-vivid-yellow);
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .requests-table {
+        width: 100%;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin: 2rem 0;
+    }
+    
+    .requests-table th {
+        background: linear-gradient(135deg, var(--agilis-dark-gray), #2c2c2c);
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+    }
+    
+    .requests-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        color: #000000;
+    }
+    
+    .requests-table tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .requests-table tr:hover td {
+        color: #000000;
+    }
+    
+    .badge-pending {
+        background: linear-gradient(45deg, #ff9800, #ff5722);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-approve {
+        background: linear-gradient(45deg, #4CAF50, #45a049);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+    
+    .btn-approve:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        color: white;
+    }
+    
+    .btn-reject {
+        background: linear-gradient(45deg, #f44336, #da190b);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+    
+    .btn-reject:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+        color: white;
+    }
+    
+    .admin-link {
+        display: inline-flex;
+        align-items: center;
+        background: linear-gradient(135deg, var(--agilis-vivid-yellow), var(--agilis-golden-yellow));
+        color: var(--agilis-black);
+        text-decoration: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+    
+    .admin-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 200, 18, 0.4);
+        color: var(--agilis-black);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #dee2e6;
+    }
+    
+    .user-info {
+        color: #000000;
+        font-weight: 500;
+    }
+    
+    .user-role {
+        color: #000000;
+    }
+    
+    .request-date {
+        color: #000000;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .requests-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="dashboard-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="bi bi-speedometer2 me-3"></i>Tableau de bord Administrateur</h1>
+                <p class="mb-0">Gestion des demandes et supervision du système</p>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-warning text-dark p-2">
+                    <i class="bi bi-people-fill me-1"></i>
+                    {{ pending_requests_count }} demande(s) en attente
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-4">
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ pending_requests_count }}</div>
+                <div class="stat-label">Demandes en attente</div>
+                <i class="bi bi-clock-history fs-1 mt-2 text-warning"></i>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ active_users }}</div>
+                <div class="stat-label">Utilisateurs actifs</div>
+                <i class="bi bi-people-fill fs-1 mt-2 text-success"></i>
+            </div>
+        </div>
+
+        <!-- Demandes en attente -->
+        <div class="card">
+            <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+                <h3 class="mb-0 text-white"><i class="bi bi-list-check me-2"></i>Demandes en attente d'approbation</h3>
+                <span class="badge bg-warning">{{ pending_requests_count }}</span>
+            </div>
+            
+            <div class="card-body p-0">
+                {% if pending_requests_list %}
+                <div class="table-responsive">
+                    <table class="requests-table">
+                        <thead>
+                            <tr>
+                                <th>Utilisateur</th>
+                                <th>Email</th>
+                                <th>Rôle demandé</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in pending_requests_list %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                            <i class="bi bi-person text-white"></i>
+                                        </div>
+                                        <div>
+                                            <strong class="user-info">{{ request.username }}</strong>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="user-info">{{ request.email }}</td>
+                                <td>
+                                    <span class="badge bg-secondary user-role">{{ request.get_role_display }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge-pending">
+                                        <i class="bi bi-clock me-1"></i>En attente
+                                    </span>
+                                </td>
+                                <td class="request-date">
+                                    {% if request.created_at %}
+                                        {{ request.created_at|date:"d/m/Y" }}
+                                    {% elif request.date_joined %}
+                                        {{ request.date_joined|date:"d/m/Y" }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="post" action="{% url 'admin_dashboard:process_request' request.pk %}" class="action-buttons">
+                                        {% csrf_token %}
+                                        <button type="submit" name="action" value="approve" class="btn-approve">
+                                            <i class="bi bi-check-circle me-1"></i>Approuver
+                                        </button>
+                                        <button type="submit" name="action" value="reject" class="btn-reject">
+                                            <i class="bi bi-x-circle me-1"></i>Rejeter
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-check-all"></i>
+                    <h4>Aucune demande en attente</h4>
+                    <p>Toutes les demandes ont été traitées.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="mt-4">
+            <a href="{% url 'admin:index' %}" class="admin-link">
+                <i class="bi bi-gear-fill me-2"></i>
+                Accéder à l'administration Django
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation des cartes statistiques
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+        
+        // Confirmation pour les actions
+        const approveButtons = document.querySelectorAll('.btn-approve');
+        const rejectButtons = document.querySelectorAll('.btn-reject');
+        
+        approveButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                if (!confirm('Êtes-vous sûr de vouloir approuver cette demande ?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+        
+        rejectButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                if (!confirm('Êtes-vous sûr de vouloir rejeter cette demande ?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

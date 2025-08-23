@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier mon profil - AGILIS Smart{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-yellow">
+                <div class="card-header bg-dark-gray text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-pencil-square me-2 text-yellow"></i>Modifier mon profil
+                    </h4>
+                </div>
+                <div class="card-body bg-medium-gray">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label text-white">
+                                    <i class="bi bi-person me-1 text-yellow"></i>Prénom
+                                </label>
+                                {{ form.first_name }}
+                                <div class="invalid-feedback">
+                                    Veuillez saisir un prénom valide.
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label text-white">
+                                    <i class="bi bi-person-fill me-1 text-yellow"></i>Nom
+                                </label>
+                                {{ form.last_name }}
+                                <div class="invalid-feedback">
+                                    Veuillez saisir un nom valide.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="{{ form.email.id_for_label }}" class="form-label text-white">
+                                <i class="bi bi-envelope me-1 text-yellow"></i>Email
+                            </label>
+                            {{ form.email }}
+                            <div class="invalid-feedback">
+                                Veuillez saisir une adresse email valide.
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label text-white">
+                                <i class="bi bi-telephone me-1 text-yellow"></i>Téléphone
+                            </label>
+                            {{ form.phone }}
+                            <div class="form-text text-muted">
+                                <i class="bi bi-info-circle me-1"></i>Format international recommandé (+212612345678)
+                            </div>
+                            <div class="invalid-feedback">
+                                Veuillez saisir un numéro valide.
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'reclamations:profile' %}" class="btn btn-outline-yellow me-md-2">
+                                <i class="bi bi-x-circle me-1"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-yellow">
+                                <i class="bi bi-check-circle me-1"></i> Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-yellow {
+        border-color: var(--agilis-vivid-yellow) !important;
+    }
+    
+    .text-yellow {
+        color: var(--agilis-vivid-yellow) !important;
+    }
+    
+    .bg-yellow {
+        background-color: var(--agilis-vivid-yellow);
+    }
+    
+    .bg-dark-gray {
+        background-color: var(--agilis-dark-gray);
+    }
+    
+    .bg-medium-gray {
+        background-color: var(--agilis-medium-gray);
+    }
+    
+    .btn-yellow {
+        background-color: var(--agilis-vivid-yellow);
+        border-color: var(--agilis-vivid-yellow);
+        color: var(--agilis-black);
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-yellow:hover {
+        background-color: var(--agilis-golden-yellow);
+        border-color: var(--agilis-golden-yellow);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(255, 200, 18, 0.3);
+    }
+    
+    .btn-outline-yellow {
+        border-color: var(--agilis-vivid-yellow);
+        color: var(--agilis-vivid-yellow);
+    }
+    
+    .btn-outline-yellow:hover {
+        background-color: var(--agilis-vivid-yellow);
+        color: var(--agilis-black);
+    }
+    
+    .form-control, .form-select {
+        background-color: rgba(255, 255, 255, 0.95);
+        border: 1px solid var(--agilis-dark-gray);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--agilis-vivid-yellow);
+        box-shadow: 0 0 0 0.25rem rgba(255, 200, 18, 0.25);
+    }
+    
+    .invalid-feedback {
+        color: var(--agilis-vivid-yellow);
+    }
+    
+    .form-text.text-muted {
+        color: #adb5bd !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Validation du formulaire
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    });
+</script>
+{% endblock %}

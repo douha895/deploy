@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Connexion - AGILIS Smart{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-yellow">
+                <div class="card-header bg-dark-gray text-white text-center">
+                    <h3 class="mb-0">
+                        <i class="bi bi-box-arrow-in-right me-2 text-yellow"></i>Connexion
+                    </h3>
+                </div>
+                <div class="card-body bg-medium-gray">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                        <div class="alert alert-danger bg-dark-gray border-danger text-white">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Identifiants incorrects. Veuillez réessayer.
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <label for="id_username" class="form-label text-white">
+                                <i class="bi bi-person-fill me-1 text-yellow"></i>Nom d'utilisateur
+                            </label>
+                            <input type="text" name="username" class="form-control bg-light border-dark" 
+                                   id="id_username" required>
+                            <div class="invalid-feedback">
+                                Veuillez saisir votre nom d'utilisateur.
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_password" class="form-label text-white">
+                                <i class="bi bi-lock-fill me-1 text-yellow"></i>Mot de passe
+                            </label>
+                            <input type="password" name="password" class="form-control bg-light border-dark" 
+                                   id="id_password" required>
+                            <div class="invalid-feedback">
+                                Veuillez saisir votre mot de passe.
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-yellow">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> Se connecter
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="mt-4 text-center">
+                        <a href="{% url 'reclamations:password_reset' %}" class="text-yellow">
+                            <i class="bi bi-question-circle me-1"></i>Mot de passe oublié ?
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-dark-gray text-center text-white">
+                    <small>
+                        Pas encore de compte ? 
+                        <a href="{% url 'register' %}" class="text-yellow">S'inscrire</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-yellow {
+        border-color: var(--agilis-vivid-yellow) !important;
+    }
+    
+    .text-yellow {
+        color: var(--agilis-vivid-yellow) !important;
+    }
+    
+    .bg-yellow {
+        background-color: var(--agilis-vivid-yellow);
+    }
+    
+    .bg-dark-gray {
+        background-color: var(--agilis-dark-gray);
+    }
+    
+    .bg-medium-gray {
+        background-color: var(--agilis-medium-gray);
+    }
+    
+    .btn-yellow {
+        background-color: var(--agilis-vivid-yellow);
+        border-color: var(--agilis-vivid-yellow);
+        color: var(--agilis-black);
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-yellow:hover {
+        background-color: var(--agilis-golden-yellow);
+        border-color: var(--agilis-golden-yellow);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(255, 200, 18, 0.3);
+    }
+    
+    .form-control, .form-select {
+        background-color: rgba(255, 255, 255, 0.95);
+        border: 1px solid var(--agilis-dark-gray);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--agilis-vivid-yellow);
+        box-shadow: 0 0 0 0.25rem rgba(255, 200, 18, 0.25);
+    }
+    
+    .alert-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+        border-color: #dc3545;
+        color: white;
+    }
+    
+    .invalid-feedback {
+        color: var(--agilis-vivid-yellow);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        //validation du formulaire
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    });
+</script>
+{% endblock %}

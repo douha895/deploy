@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% load user_tags %}
+
+{% block title %}Mon Profil - AGILIS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        border-bottom: 2px solid var(--agilis-vivid-yellow);
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-card {
+        border: none;
+        border-radius: 10px;
+        background-color: rgba(56, 56, 56, 0.95);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+        height: 100%;
+    }
+    
+    .profile-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .profile-card-header {
+        background: linear-gradient(135deg, var(--agilis-dark-gray), var(--agilis-medium-gray));
+        border-bottom: 3px solid var(--agilis-vivid-yellow);
+        padding: 1.25rem;
+    }
+    
+    .profile-card-title {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    .edit-profile-btn {
+        background-color: var(--agilis-vivid-yellow);
+        color: var(--agilis-black);
+        font-weight: 500;
+        padding: 0.25rem 0.75rem;
+        border-radius: 5px;
+        transition: all 0.3s;
+    }
+    
+    .edit-profile-btn:hover {
+        background-color: var(--agilis-golden-yellow);
+        transform: scale(1.05);
+    }
+    
+    .profile-details dt {
+        color: var(--agilis-vivid-yellow);
+        font-weight: 500;
+        padding-top: 0.5rem;
+    }
+    
+    .profile-details dd {
+        padding-top: 0.5rem;
+        color: #eee;
+    }
+    
+    .stats-card {
+        border-radius: 8px;
+        border: none;
+        transition: all 0.3s;
+        height: 100%;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stats-card.total {
+        background: linear-gradient(135deg, #17a2b8, #138496);
+    }
+    
+    .stats-card.in-progress {
+        background: linear-gradient(135deg, #ffc107, #fd7e14);
+        color: var(--agilis-black);
+    }
+    
+    .stats-card.resolved {
+        background: linear-gradient(135deg, #28a745, #218838);
+    }
+    
+    .stats-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+    
+    .stats-label {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.9;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 250px;
+        margin-top: 1.5rem;
+    }
+    
+    .no-stats-alert {
+        background-color: rgba(23, 162, 184, 0.2);
+        border-left: 4px solid var(--agilis-vivid-yellow);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="profile-header">
+        <h2 class="mb-0">
+            <i class="bi bi-person-badge me-2" style="color: var(--agilis-vivid-yellow);"></i>
+            <span style="border-bottom: 2px solid var(--agilis-vivid-yellow); padding-bottom: 5px;">Mon Profil</span>
+        </h2>
+    </div>
+    
+    <div class="row g-4">
+        
+        <div class="col-lg-4">
+            <div class="card profile-card">
+                <div class="card-header profile-card-header text-white d-flex justify-content-between align-items-center">
+                    <h5 class="profile-card-title mb-0">
+                        <i class="bi bi-person-lines-fill me-2"></i>Informations personnelles
+                    </h5>
+                    <a href="{% url 'reclamations:specialist_profile_edit' %}" class="edit-profile-btn">
+                        <i class="bi bi-pencil-fill me-1"></i> Modifier
+                    </a>
+                </div>
+                <div class="card-body">
+                    <dl class="row profile-details mb-0">
+                        <dt class="col-sm-4">Nom complet:</dt>
+                        <dd class="col-sm-8">{{ user.get_full_name|default:user.username }}</dd>
+                        
+                        <dt class="col-sm-4">Email:</dt>
+                        <dd class="col-sm-8">{{ user.email }}</dd>
+                        
+                        <dt class="col-sm-4">Téléphone:</dt>
+                        <dd class="col-sm-8">
+                            {% if user.phone %}
+                                <span><i class="bi bi-telephone-fill me-2"></i>{{ user.phone }}</span>
+                            {% else %}
+                                <span class="text-muted">Non renseigné</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Équipe:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-success">
+                                <i class="bi bi-people-fill me-1"></i> 
+                                {{ user.get_team_display }}
+                            </span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="col-lg-8">
+            <div class="card profile-card">
+                <div class="card-header profile-card-header text-white">
+                    <h5 class="profile-card-title mb-0">
+                        <i class="bi bi-graph-up-arrow me-2"></i>Mes Statistiques
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if nb_reclamations > 0 %}
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="card stats-card total text-white h-100">
+                                <div class="card-body text-center py-4">
+                                    <i class="bi bi-folder2-open fs-1"></i>
+                                    <div class="stats-value">{{ nb_reclamations }}</div>
+                                    <div class="stats-label">Total assignées</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card stats-card in-progress h-100">
+                                <div class="card-body text-center py-4">
+                                    <i class="bi bi-hourglass-split fs-1"></i>
+                                    <div class="stats-value">{{ nb_reclamations_encours }}</div>
+                                    <div class="stats-label">En cours</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card stats-card resolved text-white h-100">
+                                <div class="card-body text-center py-4">
+                                    <i class="bi bi-check-circle fs-1"></i>
+                                    <div class="stats-value">{{ nb_reclamations_resolues }}</div>
+                                    <div class="stats-label">Résolues</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Graphique -->
+                    <div class="chart-container">
+                        <canvas id="statsChart"></canvas>
+                    </div>
+                    {% else %}
+                    <div class="alert no-stats-alert d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill me-3 fs-4" style="color: var(--agilis-vivid-yellow);"></i>
+                        <div>
+                            <h5 class="alert-heading mb-1">Aucune réclamation assignée</h5>
+                            <p class="mb-0">Vous n'avez actuellement aucune réclamation assignée à votre compte.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if nb_reclamations > 0 %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    const cards = document.querySelectorAll('.profile-card, .stats-card');
+    cards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 150);
+    });
+
+    
+    const autres = {{ nb_reclamations }} - {{ nb_reclamations_encours }} - {{ nb_reclamations_resolues }};
+    const ctx = document.getElementById('statsChart');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Résolues', 'En cours', 'Autres'],
+            datasets: [{
+                data: [
+                    {{ nb_reclamations_resolues }},
+                    {{ nb_reclamations_encours }},
+                    autres
+                ],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.8)',
+                    'rgba(255, 193, 7, 0.8)',
+                    'rgba(108, 117, 125, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(255, 193, 7, 1)',
+                    'rgba(108, 117, 125, 1)'
+                ],
+                borderWidth: 1,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#eee',
+                        font: {
+                            size: 12,
+                            family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                        },
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 12
+                    },
+                    padding: 12,
+                    cornerRadius: 6
+                }
+            },
+            cutout: '65%',
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

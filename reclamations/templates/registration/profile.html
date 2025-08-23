@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Mon Profil - AGILIS Smart{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-lg border-yellow mb-4">
+                <div class="card-header bg-dark-gray text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-person-badge me-2 text-yellow"></i>Informations du compte
+                    </h4>
+                    <a href="{% url 'reclamations:profile_edit' %}" class="btn btn-sm btn-outline-yellow">
+                        <i class="bi bi-pencil me-1"></i> Modifier
+                    </a>
+                </div>
+                <div class="card-body bg-medium-gray">
+                    <div class="text-center mb-4">
+                        <div class="bg-dark-gray rounded-circle d-inline-flex align-items-center justify-content-center text-yellow" 
+                             style="width: 100px; height: 100px; font-size: 2.5rem;">
+                            {{ user.username|first|upper }}
+                        </div>
+                    </div>
+                    
+                    <h5 class="text-white mb-3">{{ user.username }}</h5>
+                    <p class="text-light mb-2"><strong><i class="bi bi-envelope me-1 text-yellow"></i>Email :</strong> {{ user.email }}</p>
+                    <p class="text-light mb-2"><strong><i class="bi bi-person-rolodex me-1 text-yellow"></i>Rôle :</strong> {{ user.get_role_display }}</p>
+                    <p class="text-light mb-3"><strong><i class="bi bi-clock-history me-1 text-yellow"></i>Dernière connexion :</strong> {{ user.last_login|date:"d/m/Y H:i" }}</p>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'password_change' %}" class="btn btn-outline-yellow btn-sm">
+                            <i class="bi bi-shield-lock me-1"></i> Changer le mot de passe
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow-lg border-yellow">
+                <div class="card-header bg-dark-gray text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-graph-up me-2 text-yellow"></i>Mes statistiques
+                    </h4>
+                </div>
+                <div class="card-body bg-medium-gray">
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-dark-gray text-white border-yellow">
+                                <div class="card-body">
+                                    <h5 class="card-title text-yellow">{{ nb_reclamations }}</h5>
+                                    <p class="card-text">Réclamations</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-dark-gray text-white border-yellow">
+                                <div class="card-body">
+                                    <h5 class="card-title text-yellow">{{ nb_reclamations_resolues }}</h5>
+                                    <p class="card-text">Résolues</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-dark-gray text-white border-yellow">
+                                <div class="card-body">
+                                    <h5 class="card-title text-yellow">{{ nb_reclamations_encours }}</h5>
+                                    <p class="card-text">En cours</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5 class="text-white mb-3">
+                            <i class="bi bi-activity me-2 text-yellow"></i>Dernières activités
+                        </h5>
+                        <div class="list-group">
+                            {% for activity in last_activities %}
+                            <div class="list-group-item bg-dark-gray text-white border-yellow mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span>{{ activity.message }}</span>
+                                    <small class="text-muted">{{ activity.created_at|timesince }}</small>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="list-group-item bg-dark-gray text-white border-yellow">
+                                Aucune activité récente
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-yellow {
+        border-color: var(--agilis-vivid-yellow) !important;
+    }
+    
+    .text-yellow {
+        color: var(--agilis-vivid-yellow) !important;
+    }
+    
+    .bg-yellow {
+        background-color: var(--agilis-vivid-yellow);
+    }
+    
+    .bg-dark-gray {
+        background-color: var(--agilis-dark-gray);
+    }
+    
+    .bg-medium-gray {
+        background-color: var(--agilis-medium-gray);
+    }
+    
+    .btn-outline-yellow {
+        border-color: var(--agilis-vivid-yellow);
+        color: var(--agilis-vivid-yellow);
+    }
+    
+    .btn-outline-yellow:hover {
+        background-color: var(--agilis-vivid-yellow);
+        color: var(--agilis-black);
+    }
+    
+    .text-light {
+        color: #f8f9fa !important;
+    }
+    
+    .list-group-item {
+        border-radius: 0.25rem !important;
+        margin-bottom: 0.5rem;
+    }
+    
+    .card-stat {
+        transition: transform 0.3s ease;
+    }
+    
+    .card-stat:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}

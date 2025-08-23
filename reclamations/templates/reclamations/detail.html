@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+{% load reclamation_tags %}
+
+{% block title %}Réclamation #{{ reclamation.id }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- carte principale de la réclamation -->
+  <div class="card mb-4 shadow-lg border-yellow">
+    <div class="card-header bg-dark-gray text-white d-flex justify-content-between align-items-center">
+      <h2 class="mb-0">
+        <i class="bi bi-card-heading me-2 text-yellow"></i>Réclamation #{{ reclamation.id }}
+      </h2>
+      <span class="badge rounded-pill fs-6
+        {% if reclamation.status == 'OPEN' %}bg-yellow text-black
+        {% elif reclamation.status == 'IN_PROGRESS' %}bg-golden-yellow text-black
+        {% elif reclamation.status == 'RESOLVED' %}bg-success
+        {% else %}bg-secondary{% endif %}">
+        {{ reclamation.get_status_display }}
+      </span>
+    </div>
+    <div class="card-body bg-medium-gray">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <h5 class="border-bottom border-yellow pb-2 text-yellow mb-3">
+            <i class="bi bi-info-circle me-2"></i>Informations
+          </h5>
+          <div class="row">
+            <div class="col-6">
+              <div class="mb-3">
+                <p class="mb-1 text-light"><strong><i class="bi bi-calendar-plus me-1"></i>Date création:</strong></p>
+                <p class="text-white">{{ reclamation.created_at|date:"d/m/Y H:i" }}</p>
+              </div>
+              <div class="mb-3">
+                <p class="mb-1 text-light"><strong><i class="bi bi-clock-history me-1"></i>Incident:</strong></p>
+                <p class="text-white">{{ reclamation.incident_date|date:"d/m/Y" }} à {{ reclamation.incident_time|time:"H:i" }}</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="mb-3">
+                <p class="mb-1 text-light"><strong><i class="bi bi-credit-card me-1"></i>Type de carte:</strong></p>
+                <p class="text-white">{{ reclamation.get_card_type_display }}</p>
+              </div>
+              <div class="mb-3">
+                <p class="mb-1 text-light"><strong><i class="bi bi-geo-alt me-1"></i>Station:</strong></p>
+                <p class="text-white">
+                  {% if reclamation.station %}
+                    {{ reclamation.station.name }} ({{ reclamation.station.code }})
+                  {% else %}
+                    <em class="text-muted">Non spécifiée</em>
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <p class="mb-1 text-light"><strong><i class="bi bi-exclamation-triangle me-1"></i>Type de problème:</strong></p>
+            <span class="badge bg-black text-yellow">{{ reclamation.get_problem_type_display }}</span>
+          </div>
+          
+          <div class="mb-3">
+            <p class="mb-1 text-light"><strong><i class="bi bi-flag me-1"></i>Priorité:</strong></p>
+            <span class="badge rounded-pill
+              {% if reclamation.priority == 'LOW' %}bg-medium-gray
+              {% elif reclamation.priority == 'MEDIUM' %}bg-golden-yellow text-black
+              {% else %}bg-danger{% endif %}">
+              {{ reclamation.get_priority_display }}
+            </span>
+          </div>
+          
+          {% if reclamation.assigned_specialist %}
+            <div class="mb-3">
+              <p class="mb-1 text-light"><strong><i class="bi bi-person-badge me-1"></i>Spécialiste assigné:</strong></p>
+              <p class="text-white">
+                {{ reclamation.assigned_specialist.get_full_name }}
+                <span class="badge bg-secondary ms-2">{{ reclamation.get_assigned_team_display }}</span>
+              </p>
+            </div>
+          {% endif %}
+        </div>
+        
+        <div class="col-md-6">
+          <h5 class="border-bottom border-yellow pb-2 text-yellow mb-3">
+            <i class="bi bi-chat-square-text me-2"></i>Description
+          </h5>
+          <div class="bg-dark-gray p-3 rounded text-white">
+            {{ reclamation.description|linebreaks }}
+          </div>
+          
+          <!-- suivi de résolution -->
+          {% if reclamation.estimated_resolution %}
+          <div class="mt-4">
+            <h5 class="border-bottom border-yellow pb-2 text-yellow mb-3">
+              <i class="bi bi-speedometer2 me-2"></i>Suivi de résolution
+            </h5>
+            <div class="alert {% if reclamation.is_overdue %}alert-warning{% else %}alert-info{% endif %} bg-dark-gray border-yellow">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-clock-history fs-4 me-3 text-yellow"></i>
+                <h5 class="mb-0 text-yellow">Temps de résolution estimé</h5>
+              </div>
+              <div class="ps-5">
+                <p class="mb-2 text-white">
+                  <i class="bi bi-calendar-check me-2 text-yellow"></i>
+                  <strong>Date estimée:</strong> {{ reclamation.estimated_resolution|date:"l d F Y" }}
+                </p>
+                <p class="mb-3 text-white">
+                  <i class="bi bi-hourglass-split me-2 text-yellow"></i>
+                  <strong>Temps restant:</strong> 
+                  <span class="{% if reclamation.is_overdue %}text-danger{% else %}text-yellow{% endif %}">
+                    {{ reclamation.estimated_resolution|timeuntil }}
+                  </span>
+                </p>
+                <div class="progress mt-2" style="height: 20px;">
+                  <div class="progress-bar progress-bar-striped 
+                      {% if reclamation.is_overdue %}bg-yellow
+                      {% else %}bg-success{% endif %}" 
+                      role="progressbar" 
+                      style="width: {{ reclamation.resolution_progress }}%" 
+                      aria-valuenow="{{ reclamation.resolution_progress }}" 
+                      aria-valuemin="0" 
+                      aria-valuemax="100">
+                    {{ reclamation.resolution_progress }}%
+                  </div>
+                </div>
+                {% if reclamation.is_overdue %}
+                <div class="alert alert-danger mt-3 mb-0 py-2 bg-dark-gray border-danger">
+                  <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                  <strong>Attention :</strong> Délai de résolution dépassé
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- pièces jointes -->
+      <div class="mt-4">
+        <h5 class="border-bottom border-yellow pb-2 text-yellow mb-3">
+          <i class="bi bi-paperclip me-2"></i>Pièces jointes
+        </h5>
+        {% if reclamation.attachments.all %}
+          <div class="row g-3">
+            {% for attachment in reclamation.attachments.all %}
+              <div class="col-md-4 col-sm-6">
+                <div class="card h-100 border-yellow bg-dark-gray">
+                  {% if attachment.file_type == 'IMAGE' %}
+                    <img src="{{ attachment.file.url }}" class="card-img-top img-thumbnail"
+                         alt="{{ attachment.description }}"
+                         style="height:150px;object-fit:cover;">
+                  {% else %}
+                    <div class="card-body text-center py-4">
+                      <i class="bi bi-file-earmark-{{ attachment.file_type|lower }} fs-1 text-yellow"></i>
+                      <h6 class="mt-2 text-white">{{ attachment.get_file_type_display }}</h6>
+                    </div>
+                  {% endif %}
+                  <div class="card-footer bg-medium-gray border-top-yellow">
+                    <small class="text-light d-block text-truncate">
+                      {{ attachment.description|default:"Pièce jointe" }}
+                    </small>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                      <small class="text-muted">{{ attachment.uploaded_at|date:"d/m/Y H:i" }}</small>
+                      <a href="{% url 'reclamations:download_attachment' pk=attachment.pk %}" 
+                         class="btn btn-sm btn-yellow">
+                        <i class="bi bi-download"></i> Télécharger
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="alert alert-info bg-dark-gray border-yellow text-white">
+            <i class="bi bi-info-circle me-2"></i>Aucune pièce jointe disponible
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Historique des mises à jour -->
+  <div class="card shadow-lg border-yellow">
+    <div class="card-header bg-dark-gray text-white">
+      <h3 class="mb-0">
+        <i class="bi bi-clock-history me-2 text-yellow"></i>Historique des mises à jour
+      </h3>
+    </div>
+    <div class="card-body bg-medium-gray">
+      {% for update in reclamation.updates.all|dictsortreversed:"created_at" %}
+        <div class="mb-3 p-3 rounded bg-dark-gray
+          {% if update.is_status_change %}border-start border-4 border-info
+          {% elif update.is_internal_note %}border-start border-4 border-black
+          {% else %}border-start border-4 border-yellow{% endif %}">
+          
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex align-items-center">
+              <i class="bi bi-person-circle fs-4 me-2 text-yellow"></i>
+              <div>
+                <strong class="text-white">{{ update.author.get_full_name|default:"Système" }}</strong>
+                {% if update.is_internal_note %}
+                  <span class="badge bg-black text-yellow ms-2">Interne</span>
+                {% endif %}
+              </div>
+            </div>
+            <small class="text-muted">{{ update.created_at|date:"d/m/Y H:i" }}</small>
+          </div>
+          
+          {% if update.is_status_change %}
+            <div class="alert alert-info py-1 px-2 mt-2 mb-3 d-inline-flex align-items-center bg-black border-info">
+              <i class="bi bi-arrow-repeat me-2 text-info"></i>
+              <span class="text-white">Statut changé à: <strong>{{ update.get_new_status_display }}</strong></span>
+            </div>
+          {% endif %}
+          
+          <div class="mt-2 text-white">
+            {{ update.message|linebreaks }}
+          </div>
+          
+          {% if update.attachments.all %}
+            <div class="mt-3">
+              <small class="text-muted d-block mb-2"><i class="bi bi-paperclip me-1"></i>Fichiers joints :</small>
+              <div class="d-flex flex-wrap gap-2">
+                {% for att in update.attachments.all %}
+                  <a href="{% url 'reclamations:download_attachment' pk=att.pk %}" 
+                     class="badge bg-yellow text-black d-flex align-items-center">
+                    <i class="bi bi-file-earmark-{{ att.file_type|lower }} me-1"></i>
+                    {{ att.get_file_type_display }}
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% empty %}
+        <div class="alert alert-info bg-dark-gray border-yellow text-white">
+          <i class="bi bi-info-circle me-2"></i>Aucune mise à jour pour le moment.
+        </div>
+      {% endfor %}
+
+      <!-- Formulaire de mise à jour -->
+      {% if not reclamation.status|in_statuses:"RESOLVED,REJECTED" and request.user|can_update_reclamation:reclamation %}
+        <hr class="border-yellow">
+        <h4 class="mb-3 text-yellow">
+          <i class="bi bi-plus-circle me-2"></i>Ajouter une mise à jour
+        </h4>
+        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+          {% csrf_token %}
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="{{ update_form.new_status.id_for_label }}" class="form-label text-white">
+                <i class="bi bi-arrow-repeat me-1 text-yellow"></i>Changer le statut
+              </label>
+              <select name="new_status" class="form-select bg-light border-dark" id="id_new_status">
+                {% for value, label in update_form.new_status.field.choices %}
+                  <option value="{{ value }}" {% if update_form.new_status.value == value %}selected{% endif %}>
+                    {{ label }}
+                  </option>
+                {% endfor %}
+              </select>
+              {% if update_form.new_status.errors %}
+                <div class="invalid-feedback d-block text-yellow">
+                  {{ update_form.new_status.errors|join:", " }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-white">
+                <i class="bi bi-paperclip me-1 text-yellow"></i>Ajouter des fichiers
+              </label>
+              <input type="file" name="attachments" multiple class="form-control bg-light border-dark"
+                     accept="image/*,.pdf,.doc,.docx" id="id_attachments">
+              <small class="text-muted">Formats acceptés: images, PDF, Word (max 5MB par fichier)</small>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ update_form.message.id_for_label }}" class="form-label text-white">
+              <i class="bi bi-chat-left-text me-1 text-yellow"></i>Message
+            </label>
+            {{ update_form.message }}
+            {% if update_form.message.errors %}
+              <div class="invalid-feedback d-block text-yellow">
+                {{ update_form.message.errors|join:", " }}
+              </div>
+            {% endif %}
+          </div>
+
+          {% if request.user.role != 'CLIENT' %}
+            <div class="mb-3 form-check form-switch ps-0">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="is_internal_note" id="id_is_internal_note">
+                <label class="form-check-label text-white" for="id_is_internal_note">
+                  <i class="bi bi-eye-slash me-1 text-yellow"></i>Note interne (visible seulement par les agents)
+                </label>
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="d-flex justify-content-end mt-4">
+            <button type="submit" class="btn btn-yellow">
+              <i class="bi bi-save me-1"></i> Enregistrer
+            </button>
+          </div>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .border-yellow {
+    border-color: var(--agilis-vivid-yellow) !important;
+  }
+  
+  .text-yellow {
+    color: var(--agilis-vivid-yellow);
+  }
+  
+  .bg-yellow {
+    background-color: var(--agilis-vivid-yellow);
+  }
+  
+  .bg-golden-yellow {
+    background-color: var(--agilis-golden-yellow);
+  }
+  
+  .bg-dark-gray {
+    background-color: var(--agilis-dark-gray);
+  }
+  
+  .bg-medium-gray {
+    background-color: var(--agilis-medium-gray);
+  }
+  
+  .bg-black {
+    background-color: var(--agilis-black);
+  }
+  
+  .btn-yellow {
+    background-color: var(--agilis-vivid-yellow);
+    border-color: var(--agilis-vivid-yellow);
+    color: var(--agilis-black);
+    font-weight: 600;
+  }
+  
+  .btn-yellow:hover {
+    background-color: var(--agilis-golden-yellow);
+    border-color: var(--agilis-golden-yellow);
+    color: var(--agilis-black);
+  }
+  
+  .alert-info {
+    background-color: rgba(13, 202, 240, 0.1);
+    border-color: #0dcaf0;
+    color: #0dcaf0;
+  }
+  
+  .alert-warning {
+    background-color: rgba(255, 200, 18, 0.1);
+    border-color: var(--agilis-vivid-yellow);
+    color: var(--agilis-vivid-yellow);
+  }
+  
+  .progress-bar {
+    transition: width 0.6s ease;
+  }
+  
+  .progress-bar-striped {
+    background-image: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.15) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.15) 75%,
+      transparent 75%,
+      transparent
+    );
+    background-size: 1rem 1rem;
+  }
+  
+  .border-info {
+    border-color: #0dcaf0 !important;
+  }
+  
+  .border-black {
+    border-color: var(--agilis-black) !important;
+  }
+  
+  .form-control, .form-select, textarea {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--agilis-dark-gray);
+  }
+  
+  .form-control:focus, .form-select:focus, textarea:focus {
+    border-color: var(--agilis-vivid-yellow);
+    box-shadow: 0 0 0 0.25rem rgba(255, 200, 18, 0.25);
+  }
+  
+  .form-check-input:checked {
+    background-color: var(--agilis-vivid-yellow);
+    border-color: var(--agilis-vivid-yellow);
+  }
+  
+  .invalid-feedback {
+    display: block;
+  }
+</style>
+
+<script>
+  (function() {
+    'use strict';
+    const forms = document.querySelectorAll('.needs-validation');
+    
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
+</script>
+{% endblock %}

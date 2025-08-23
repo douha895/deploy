@@ -1,0 +1,22 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2>Nouvelle réclamation assignée</h2>
+<p>Bonjour {{ specialist.first_name }},</p>
+
+<p>Une nouvelle réclamation vous a été assignée :</p>
+
+<div class="card">
+    <div class="card-body">
+        <h5>Réclamation #{{ reclamation.id }}</h5>
+        <p><strong>Type :</strong> {{ problem_type }}</p>
+        <p><strong>Priorité :</strong> {{ priority }}</p>
+        <p><strong>Date :</strong> {{ reclamation.created_at|date:"d/m/Y H:i" }}</p>
+    </div>
+</div>
+
+<a href="{{ detail_url }}" class="btn btn-primary">Voir la réclamation</a>
+
+<p>Cordialement,<br>
+L'équipe AGILIS</p>
+{% endblock %}

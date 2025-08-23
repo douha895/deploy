@@ -1,0 +1,20 @@
+{% if action == 'assigned' %}Bonjour {{ specialist.first_name }},
+
+La réclamation #{{ reclamation.id }} vous a été réaffectée.
+
+Ancien responsable : {{ old_specialist.get_full_name }}
+{% else %}Bonjour {{ specialist.first_name }},
+
+La réclamation #{{ reclamation.id }} a été transférée à {{ new_specialist.get_full_name }}.
+{% endif %}
+
+Détails :
+- Type : {{ reclamation.get_problem_type_display }}
+- Priorité : {{ reclamation.get_priority_display }}
+- Date création : {{ reclamation.created_at|date:"d/m/Y H:i" }}
+
+Accéder à la réclamation :
+{{ BASE_URL }}{% url 'reclamations:detail' reclamation.id %}
+
+Cordialement,
+L'équipe AGILIS
