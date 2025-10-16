@@ -5,10 +5,8 @@ from django.contrib.messages import constants as messages
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'azertyuiop^$qsdfghjklmù*wxcvbn,;:!123456789'
-DEBUG = False
-ALLOWED_HOSTS = ['dhouha.pythonanywhere.com','127.0.0.1', 'localhost']
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
+DEBUG = True
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -35,7 +33,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'agilisb.middleware.PublicAccessMiddleware',
     'django_browser_reload.middleware.BrowserReloadMiddleware',
-
     #'reclamations.middleware.RoleRedirectMiddleware',  
 ]
 
